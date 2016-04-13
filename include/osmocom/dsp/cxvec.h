@@ -42,16 +42,16 @@ struct osmo_cxvec {
 	int len;		/*!< \brief Valid length */
 	int max_len;		/*!< \brief Maximum length in data field */
 	int flags;		/*!< \brief Flags, see CXVEC_FLG_xxx */
-	float complex *data;	/*!< \brief Data field */
-	float complex _data[0];	/*!< \brief Optional inline data array */
+	_Fcomplex *data;	/*!< \brief Data field */
+	_Fcomplex _data[0];	/*!< \brief Optional inline data array */
 };
 
 void
 osmo_cxvec_init_from_data(struct osmo_cxvec *cv,
-                          float complex *data, int len);
+                         _Fcomplex *data, int len);
 
 struct osmo_cxvec *
-osmo_cxvec_alloc_from_data(float complex *data, int len);
+osmo_cxvec_alloc_from_data(_Fcomplex *data, int len);
 
 struct osmo_cxvec *
 osmo_cxvec_alloc(int max_len);

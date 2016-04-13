@@ -40,7 +40,7 @@
 
 /* IQ balance correction and estimation */
 
-void osmo_iqbal_fix(float complex *out, float complex *in, unsigned int len,
+void osmo_iqbal_fix(_Fcomplex *out, _Fcomplex *in, unsigned int len,
                     float mag, float phase);
 
 struct osmo_cxvec *
@@ -48,7 +48,7 @@ osmo_iqbal_cxvec_fix(const struct osmo_cxvec *in, float mag, float phase,
                      struct osmo_cxvec *out);
 
 float
-osmo_iqbal_estimate(const float complex *data,
+osmo_iqbal_estimate(const _Fcomplex *data,
                     int fft_size, int fft_count);
 
 float

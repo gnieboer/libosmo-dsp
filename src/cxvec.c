@@ -46,7 +46,7 @@
  */
 void
 osmo_cxvec_init_from_data(struct osmo_cxvec *cv,
-                          float complex *data, int len)
+                          _Fcomplex *data, int len)
 {
 	cv->len   = cv->max_len = len;
 	cv->flags = 0;
@@ -60,7 +60,7 @@ osmo_cxvec_init_from_data(struct osmo_cxvec *cv,
  *  The data is not copied, it is just referenced.
  */
 struct osmo_cxvec *
-osmo_cxvec_alloc_from_data(float complex *data, int len)
+osmo_cxvec_alloc_from_data(_Fcomplex *data, int len)
 {
 	struct osmo_cxvec *cv;
 
@@ -84,7 +84,7 @@ osmo_cxvec_alloc(int max_len)
 {
 	struct osmo_cxvec *cv;
 
-	cv = malloc(sizeof(struct osmo_cxvec) + max_len * sizeof(float complex));
+	cv = malloc(sizeof(struct osmo_cxvec) + max_len * sizeof(_Fcomplex));
 	if (!cv)
 		return NULL;
 
@@ -122,7 +122,7 @@ osmo_cxvec_dbg_dump(struct osmo_cxvec *cv, const char *fname)
 	int rv;
 	if (!f)
 		return;
-	rv = fwrite(cv->data, sizeof(float complex), cv->len, f);
+	rv = fwrite(cv->data, sizeof(_Fcomplex), cv->len, f);
 	if (rv != cv->len)
 		fprintf(stderr, "[!] osmo_cxvec_dbg_dump: fwrite failed !\n");
 	fclose(f);

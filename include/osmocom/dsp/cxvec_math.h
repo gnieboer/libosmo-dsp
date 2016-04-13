@@ -62,7 +62,7 @@ osmo_sinc(float x)
  *  \returns \f$|c|^2\f$
  */
 static inline float
-osmo_normsqf(float complex c)
+osmo_normsqf(_Fcomplex c)
 {
 	return crealf(c) * crealf(c) + cimagf(c) * cimagf(c);
 }
@@ -71,7 +71,7 @@ osmo_normsqf(float complex c)
 	/* Complex vector math */
 
 struct osmo_cxvec *
-osmo_cxvec_scale(const struct osmo_cxvec *in, float complex scale,
+osmo_cxvec_scale(const struct osmo_cxvec *in, _Fcomplex scale,
                  struct osmo_cxvec *out);
 
 struct osmo_cxvec *
@@ -100,7 +100,7 @@ struct osmo_cxvec *
 osmo_cxvec_correlate(const struct osmo_cxvec *f, const struct osmo_cxvec *g,
                      int g_corr_step, struct osmo_cxvec *out);
 
-float complex
+_Fcomplex
 osmo_cxvec_interpolate_point(const struct osmo_cxvec *cv, float pos);
 
 /*! \brief Various possible peak finding algorithms */
@@ -116,7 +116,7 @@ enum osmo_cxvec_peak_alg {
 float
 osmo_cxvec_peak_energy_find(const struct osmo_cxvec *cv, int win_size,
                             enum osmo_cxvec_peak_alg alg,
-                            float complex *peak_val_p);
+        							_Fcomplex *peak_val_p);
 
 struct osmo_cxvec *
 osmo_cxvec_sig_normalize(const struct osmo_cxvec *sig,

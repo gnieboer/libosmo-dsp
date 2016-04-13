@@ -40,7 +40,12 @@
 #include <osmocom/dsp/cxvec_math.h>
 #include <osmocom/dsp/iqbal.h>
 
-
+_Fcomplex _FCaddcc(_Fcomplex A, _Fcomplex B)
+{
+	float real_val = crealf(A) + crealf(B);
+	float imag_val = cimagf(A) + cimagf(B);
+	return _FCbuild(real_val, imag_val);
+}
 /* ------------------------------------------------------------------------ */
 /* IQ balance correction and estimation                                     */
 /* ------------------------------------------------------------------------ */
@@ -58,15 +63,15 @@
  *  (with in[i] = a+bi).
  */
 void
-osmo_iqbal_fix(float complex *out, float complex *in, unsigned int len,
+osmo_iqbal_fix(_Fcomplex *out, _Fcomplex *in, unsigned int len,
                float mag, float phase)
 {
 	int i;
 
 	for (i=0; i<len; i++) {
-		float complex v = in[i];
-		out[i] = (crealf(v) * (1.0f + mag)) +
-		         (cimagf(v) + phase * crealf(v)) * I;
+		_Fcomplex v = in[i];
+		out[i] = _FCaddcc(_FCbuild((crealf(v) * (1.0f + mag)),0) ,
+				_FCmulcr(I, (cimagf(v) + phase * crealf(v))));
 	}
 }
 
@@ -101,7 +106,7 @@ osmo_iqbal_cxvec_fix(const struct osmo_cxvec *in, float mag, float phase,
 
 /*! \brief Cache for \ref _osmo_iqbal_estimate when doing lots of calls */
 struct _iqbal_estimate_state {
-	float complex *fft;	/*!< \brief Temporary memory for FFT */
+	_Fcomplex *fft;	/*!< \brief Temporary memory for FFT */
 	fftwf_plan fft_plan;	/*!< \brief FFTW plan */
 };
 
@@ -131,10 +136,10 @@ _osmo_iqbal_estimate_release(struct _iqbal_estimate_state *state)
  *  should also be initialized to NULL.
  */
 static float
-_osmo_iqbal_estimate(const float complex *data, int fft_size, int fft_count,
+_osmo_iqbal_estimate(const _Fcomplex *data, int fft_size, int fft_count,
                      struct _iqbal_estimate_state **state_p)
 {
-	float complex *fft;
+	_Fcomplex *fft;
 	float est = 0.0f;
 	fftwf_plan fft_plan;
 	int i, j;
@@ -143,19 +148,19 @@ _osmo_iqbal_estimate(const float complex *data, int fft_size, int fft_count,
 		fft = (*state_p)->fft;
 		fft_plan = (*state_p)->fft_plan;
 	} else {
-		fft = malloc(sizeof(float complex) * fft_size);
+		fft = malloc(sizeof(_Fcomplex) * fft_size);
 		fft_plan = fftwf_plan_dft_1d(fft_size, fft, fft, FFTW_FORWARD, FFTW_ESTIMATE);
 	}
 
 	for (i=0; i<fft_count; i++)
 	{
-		float complex corr = 0.0f;
+		_Fcomplex corr = { 0.0f, 0.0f };
 
-		memcpy(fft, &data[i*fft_size], sizeof(float complex) * fft_size);
+		memcpy(fft, &data[i*fft_size], sizeof(_Fcomplex) * fft_size);
 		fftwf_execute(fft_plan);
 
 		for (j=1; j<fft_size/2; j++)
-			corr += fft[fft_size-j] * conjf(fft[j]);
+			corr = _FCaddcc(corr, _FCmulcc(fft[fft_size-j] , conjf(fft[j])));
 
 		est += osmo_normsqf(corr); /* / (fft_size / 2); */
 	}
@@ -181,7 +186,7 @@ _osmo_iqbal_estimate(const float complex *data, int fft_size, int fft_count,
  *  \returns A number >= 0.0f estimating the IQ balance (the lower, the better)
  */
 float
-osmo_iqbal_estimate(const float complex *data, int fft_size, int fft_count)
+osmo_iqbal_estimate(const _Fcomplex *data, int fft_size, int fft_count)
 {
 	return _osmo_iqbal_estimate(data, fft_size, fft_count, NULL);
 }
